@@ -314,6 +314,7 @@ func Itoa(v int64) string {
 	return Str(v)
 }
 
+<<<<<<< HEAD
 // Str converts numbers and booleans to a string.
 func Str[I int | int64 | float64 | bool](val I) string {
 	const (
@@ -344,3 +345,12 @@ const (
 	ProtocolUsenet  Protocol = "usenet"
 	ProtocolTorrent Protocol = "torrent"
 )
+
+// Must can be used to avoid checking an error you'll never run into.
+func Must[S any](input S, err error) S {
+	if err != nil {
+		panic("Must failed: " + err.Error())
+	}
+
+	return input
+}

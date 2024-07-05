@@ -70,12 +70,3 @@ func zeroField(field reflect.Value, really bool) {
 		field.SetZero()
 	}
 }
-
-// Must can be used to avoid checking an error you'll never run into.
-func Must[S any](input S, err error) S {
-	if err != nil {
-		panic("Must failed: " + err.Error())
-	}
-
-	return input
-}
