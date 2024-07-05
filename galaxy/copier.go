@@ -1,3 +1,6 @@
+// Package galaxy provides functions to modify data structures among the various starr libraries.
+// These functions cannot live in the starr library without causing an import cycle.
+// These are wrappers around the starr library and other sub modules.
 package galaxy
 
 import (
@@ -14,15 +17,13 @@ import (
 	"golift.io/starr/sonarr"
 )
 
-var ErrNotPtr = errors.New("must provide a pointer to a struct")
+var ErrNotPtr = errors.New("must provide a pointer to a non-nil value")
 
 // Copy is an easy way to copy one data structure to another.
 func Copy(src interface{}, dst interface{}) error {
-	if s := reflect.TypeOf(src); s.Kind() != reflect.Ptr ||
-		s.Elem().Kind() != reflect.Struct {
+	if s := reflect.TypeOf(src); src == nil || s.Kind() != reflect.Ptr {
 		return fmt.Errorf("copy source: %w", ErrNotPtr)
-	} else if d := reflect.TypeOf(dst); d.Kind() != reflect.Ptr ||
-		d.Elem().Kind() != reflect.Struct {
+	} else if d := reflect.TypeOf(dst); dst == nil || d.Kind() != reflect.Ptr {
 		return fmt.Errorf("copy destination: %w", ErrNotPtr)
 	}
 
@@ -39,11 +40,13 @@ func Copy(src interface{}, dst interface{}) error {
 	return nil
 }
 
+// IndexerInput represents all possible Indexer inputs.
 type IndexerInput interface {
 	*lidarr.IndexerInput | *prowlarr.IndexerInput | *radarr.IndexerInput |
 		*readarr.IndexerInput | *sonarr.IndexerInput
 }
 
+// IndexerOutput represents all possible Indexer outputs.
 type IndexerOutput interface {
 	*lidarr.IndexerOutput | *prowlarr.IndexerOutput | *radarr.IndexerOutput |
 		*readarr.IndexerOutput | *sonarr.IndexerOutput
@@ -55,17 +58,20 @@ func CopyIndexer[S IndexerInput | IndexerOutput, D IndexerInput](src S, dst D, k
 		return dst, err
 	}
 
-	dstElem := reflect.ValueOf(dst).Elem()
-	dstElem.FieldByName("ID").SetZero()
-
-	if !keepTags {
-		dstElem.FieldByName("Tags").SetZero()
-	}
+	element := reflect.ValueOf(dst).Elem()
+	zeroField(element.FieldByName("ID"), true)
+	zeroField(element.FieldByName("Tags"), !keepTags)
 
 	return dst, nil
 }
 
-// Must can be used to avoid checking an error.
+func zeroField(field reflect.Value, really bool) {
+	if really && field.CanSet() {
+		field.SetZero()
+	}
+}
+
+// Must can be used to avoid checking an error you'll never run into.
 func Must[S any](input S, err error) S {
 	if err != nil {
 		panic("Must failed: " + err.Error())
