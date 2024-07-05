@@ -69,6 +69,8 @@ func TestCopyIndexer(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+	t.Parallel()
+
 	broken := struct{}{}
 	good := &prowlarr.IndexerOutput{}
 
