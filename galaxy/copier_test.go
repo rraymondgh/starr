@@ -64,7 +64,7 @@ func TestCopyIndexer(t *testing.T) {
 	assert.True(t, dst.EnableInteractiveSearch)
 	assert.True(t, dst.EnableRss)
 	// Make sure tags get depleted.
-	galaxy.Must(galaxy.CopyIndexer(src, dst, false))
+	starr.Must(galaxy.CopyIndexer(src, dst, false))
 	assert.Zero(t, dst.Tags)
 }
 
