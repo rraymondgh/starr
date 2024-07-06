@@ -1,4 +1,4 @@
-package galaxy_test
+package orbit_test
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golift.io/starr"
-	"golift.io/starr/galaxy"
+	"golift.io/starr/orbit"
 	"golift.io/starr/prowlarr"
 	"golift.io/starr/sonarr"
 )
@@ -39,7 +39,7 @@ func TestCopyIndexer(t *testing.T) {
 	}
 
 	// Verify everything copies over.
-	_, err := galaxy.CopyIndexer(src, dst, true)
+	_, err := orbit.CopyIndexer(src, dst, true)
 	require.NoError(t, err)
 	assert.Equal(t, src.Fields[0].Value, dst.Fields[0].Value)
 	assert.Equal(t, src.Fields[1].Value, dst.Fields[1].Value)
@@ -64,7 +64,7 @@ func TestCopyIndexer(t *testing.T) {
 	assert.True(t, dst.EnableInteractiveSearch)
 	assert.True(t, dst.EnableRss)
 	// Make sure tags get depleted.
-	starr.Must(galaxy.CopyIndexer(src, dst, false))
+	starr.Must(orbit.CopyIndexer(src, dst, false))
 	assert.Zero(t, dst.Tags)
 }
 
@@ -74,6 +74,6 @@ func TestCopy(t *testing.T) {
 	broken := struct{}{}
 	good := &prowlarr.IndexerOutput{}
 
-	require.ErrorIs(t, galaxy.Copy(broken, good), galaxy.ErrNotPtr)
-	require.ErrorIs(t, galaxy.Copy(good, broken), galaxy.ErrNotPtr)
+	require.ErrorIs(t, orbit.Copy(broken, good), orbit.ErrNotPtr)
+	require.ErrorIs(t, orbit.Copy(good, broken), orbit.ErrNotPtr)
 }

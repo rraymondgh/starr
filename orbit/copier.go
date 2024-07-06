@@ -1,7 +1,7 @@
-// Package galaxy provides functions to modify data structures among the various starr libraries.
+// Package orbit provides functions to modify data structures among the various starr libraries.
 // These functions cannot live in the starr library without causing an import cycle.
 // These are wrappers around the starr library and other sub modules.
-package galaxy
+package orbit
 
 import (
 	"bytes"
