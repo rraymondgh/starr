@@ -11,33 +11,66 @@ import (
 	"golift.io/starr/sonarr"
 )
 
+func TestCopyIndexers(t *testing.T) {
+	t.Parallel()
+	src1, dst1 := copyData(t)
+	src2, dst2 := copyData(t)
+	src3, dst3 := copyData(t)
+	src4, _ := copyData(t)
+	src5, _ := copyData(t)
+	// We test for these.
+	src1.Priority = 1
+	src2.Priority = 2
+	src3.Priority = 3
+	src4.Priority = 4
+	src5.Priority = 5
+	// Make two lists.
+	srcs := append([]*prowlarr.IndexerOutput{}, src1, src2, src3, src4, src5)
+	dsts := append([]*sonarr.IndexerInput{}, dst1, dst2, dst3) // short by 2.
+	// Copy the lists.
+	dsts2, err := orbit.CopyIndexers(srcs, &dsts, false)
+	require.NoError(t, err)
+	// Make sure both outputs have a length matching the input.
+	assert.Len(t, dsts, len(srcs))
+	assert.Len(t, dsts2, len(srcs))
+	// Test that values got copied.
+	for idx, src := range srcs {
+		assert.Equal(t, src.Priority, dsts[idx].Priority)
+	}
+}
+
+func copyData(t *testing.T) (*prowlarr.IndexerOutput, *sonarr.IndexerInput) {
+	t.Helper()
+
+	return &prowlarr.IndexerOutput{
+			ID:             2,
+			Priority:       3,
+			Name:           "yes",
+			Protocol:       "usenet",
+			Implementation: "core",
+			ConfigContract: "hancock",
+			Tags:           []int{1, 2, 5},
+			Fields: []*starr.FieldOutput{
+				{Name: "One", Value: "one"},
+				{Name: "Two", Value: 2.0},
+				{Name: "Three", Value: uint(3)},
+				{Name: "Five", Value: 5},
+			},
+		},
+		// This is a real example of how you'd copy an indexer from Prowlarr to Sonarr.
+		&sonarr.IndexerInput{
+			// These are not part of the used input, so set them before copying.
+			EnableAutomaticSearch:   true,
+			EnableInteractiveSearch: true,
+			EnableRss:               true,
+			DownloadClientID:        15,
+		}
+}
+
 func TestCopyIndexer(t *testing.T) {
 	t.Parallel()
 
-	src := &prowlarr.IndexerOutput{
-		ID:             2,
-		Priority:       3,
-		Name:           "yes",
-		Protocol:       "usenet",
-		Implementation: "core",
-		ConfigContract: "hancock",
-		Tags:           []int{1, 2, 5},
-		Fields: []*starr.FieldOutput{
-			{Name: "One", Value: "one"},
-			{Name: "Two", Value: 2.0},
-			{Name: "Three", Value: uint(3)},
-			{Name: "Five", Value: 5},
-		},
-	}
-	// This is a real example of how you'd copy an indexer from Prowlarr to Sonarr.
-	dst := &sonarr.IndexerInput{
-		// These are not part of the used input, so set them before copying.
-		EnableAutomaticSearch:   true,
-		EnableInteractiveSearch: true,
-		EnableRss:               true,
-		DownloadClientID:        15,
-	}
-
+	src, dst := copyData(t)
 	// Verify everything copies over.
 	_, err := orbit.CopyIndexer(src, dst, true)
 	require.NoError(t, err)

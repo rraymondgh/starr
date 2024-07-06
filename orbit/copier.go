@@ -20,7 +20,7 @@ import (
 var ErrNotPtr = errors.New("must provide a pointer to a non-nil value")
 
 // Copy is an easy way to copy one data structure to another.
-func Copy(src interface{}, dst interface{}) error {
+func Copy(src, dst any) error {
 	if src == nil || reflect.TypeOf(src).Kind() != reflect.Ptr {
 		return fmt.Errorf("copy source: %w", ErrNotPtr)
 	} else if dst == nil || reflect.TypeOf(dst).Kind() != reflect.Ptr {
@@ -41,18 +41,45 @@ func Copy(src interface{}, dst interface{}) error {
 
 // IndexerInput represents all possible Indexer inputs.
 type IndexerInput interface {
-	*lidarr.IndexerInput | *prowlarr.IndexerInput | *radarr.IndexerInput |
-		*readarr.IndexerInput | *sonarr.IndexerInput
+	lidarr.IndexerInput | prowlarr.IndexerInput | radarr.IndexerInput |
+		readarr.IndexerInput | sonarr.IndexerInput
 }
 
 // IndexerOutput represents all possible Indexer outputs.
 type IndexerOutput interface {
-	*lidarr.IndexerOutput | *prowlarr.IndexerOutput | *radarr.IndexerOutput |
-		*readarr.IndexerOutput | *sonarr.IndexerOutput
+	lidarr.IndexerOutput | prowlarr.IndexerOutput | radarr.IndexerOutput |
+		readarr.IndexerOutput | sonarr.IndexerOutput
+}
+
+// CopyIndexers copies a slice of indexers from one type to another, so you may copy them among instances.
+// The destination must be a pointer to a slice, so it can be updated in place.
+// The destination slice may be empty but not nil.
+func CopyIndexers[S IndexerInput | IndexerOutput, D IndexerInput](src []*S, dst *[]*D, keepTags bool) ([]*D, error) {
+	if dst == nil {
+		return nil, ErrNotPtr
+	}
+
+	var err error
+
+	for idx, indexer := range src {
+		if len(*dst)-1 >= idx { // The destination slice location exists, so update it in place.
+			_, err = CopyIndexer(indexer, (*dst)[idx], keepTags)
+		} else { // The destination slice is shorter than the source, so append to it.
+			newIndexer := new(D)
+			newIndexer, err = CopyIndexer(indexer, newIndexer, keepTags)
+			*dst = append(*dst, newIndexer) // This happens before checking the error.
+		}
+
+		if err != nil {
+			break
+		}
+	}
+
+	return *dst, err
 }
 
 // CopyIndexer copies an indexer from one type to another, so you may copy them among instances.
-func CopyIndexer[S IndexerInput | IndexerOutput, D IndexerInput](src S, dst D, keepTags bool) (D, error) {
+func CopyIndexer[S IndexerInput | IndexerOutput, D IndexerInput](src *S, dst *D, keepTags bool) (*D, error) {
 	if err := Copy(src, dst); err != nil {
 		return dst, err
 	}
