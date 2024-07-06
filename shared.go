@@ -314,7 +314,6 @@ func Itoa(v int64) string {
 	return Str(v)
 }
 
-<<<<<<< HEAD
 // Str converts numbers and booleans to a string.
 func Str[I int | int64 | float64 | bool](val I) string {
 	const (
