@@ -21,14 +21,13 @@ var ErrNotPtr = errors.New("must provide a pointer to a non-nil value")
 
 // Copy is an easy way to copy one data structure to another.
 func Copy(src interface{}, dst interface{}) error {
-	if s := reflect.TypeOf(src); src == nil || s.Kind() != reflect.Ptr {
+	if src == nil || reflect.TypeOf(src).Kind() != reflect.Ptr {
 		return fmt.Errorf("copy source: %w", ErrNotPtr)
-	} else if d := reflect.TypeOf(dst); dst == nil || d.Kind() != reflect.Ptr {
+	} else if dst == nil || reflect.TypeOf(dst).Kind() != reflect.Ptr {
 		return fmt.Errorf("copy destination: %w", ErrNotPtr)
 	}
 
 	var buf bytes.Buffer
-
 	if err := json.NewEncoder(&buf).Encode(src); err != nil {
 		return fmt.Errorf("encoding: %w", err)
 	}
