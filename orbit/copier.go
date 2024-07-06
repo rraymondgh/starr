@@ -53,7 +53,7 @@ type IndexerOutput interface {
 
 // CopyIndexers copies a slice of indexers from one type to another, so you may copy them among instances.
 // The destination must be a pointer to a slice, so it can be updated in place.
-// The destination slice may be empty but not nil.
+// The destination slice may be empty but the pointer to it must not be nil.
 func CopyIndexers[S IndexerInput | IndexerOutput, D IndexerInput](src []*S, dst *[]*D, keepTags bool) ([]*D, error) {
 	if dst == nil {
 		return nil, ErrNotPtr

@@ -11,34 +11,6 @@ import (
 	"golift.io/starr/sonarr"
 )
 
-func TestCopyIndexers(t *testing.T) {
-	t.Parallel()
-	src1, dst1 := copyData(t)
-	src2, dst2 := copyData(t)
-	src3, dst3 := copyData(t)
-	src4, _ := copyData(t)
-	src5, _ := copyData(t)
-	// We test for these.
-	src1.Priority = 1
-	src2.Priority = 2
-	src3.Priority = 3
-	src4.Priority = 4
-	src5.Priority = 5
-	// Make two lists.
-	srcs := append([]*prowlarr.IndexerOutput{}, src1, src2, src3, src4, src5)
-	dsts := append([]*sonarr.IndexerInput{}, dst1, dst2, dst3) // short by 2.
-	// Copy the lists.
-	dsts2, err := orbit.CopyIndexers(srcs, &dsts, false)
-	require.NoError(t, err)
-	// Make sure both outputs have a length matching the input.
-	assert.Len(t, dsts, len(srcs))
-	assert.Len(t, dsts2, len(srcs))
-	// Test that values got copied.
-	for idx, src := range srcs {
-		assert.Equal(t, src.Priority, dsts[idx].Priority)
-	}
-}
-
 func copyData(t *testing.T) (*prowlarr.IndexerOutput, *sonarr.IndexerInput) {
 	t.Helper()
 
@@ -57,7 +29,6 @@ func copyData(t *testing.T) (*prowlarr.IndexerOutput, *sonarr.IndexerInput) {
 				{Name: "Five", Value: 5},
 			},
 		},
-		// This is a real example of how you'd copy an indexer from Prowlarr to Sonarr.
 		&sonarr.IndexerInput{
 			// These are not part of the used input, so set them before copying.
 			EnableAutomaticSearch:   true,
@@ -65,6 +36,64 @@ func copyData(t *testing.T) (*prowlarr.IndexerOutput, *sonarr.IndexerInput) {
 			EnableRss:               true,
 			DownloadClientID:        15,
 		}
+}
+
+func TestCopyIndexers(t *testing.T) {
+	t.Parallel()
+	src1, dst1 := copyData(t)
+	src2, dst2 := copyData(t)
+	src3, dst3 := copyData(t)
+	src4, _ := copyData(t)
+	src5, _ := copyData(t)
+	// We test for these.
+	src1.Priority = 1
+	src2.Priority = 2
+	src3.Priority = 3
+	src4.Priority = 4
+	src5.Priority = 5
+	// Make two lists.
+	srcs := append([]*prowlarr.IndexerOutput{}, src1, src2, src3, src4, src5)
+	dsts := append([]*sonarr.IndexerInput{}, dst1, dst2, dst3) // Short by 2.
+	// Copy the lists.
+	dsts2, err := orbit.CopyIndexers(srcs, &dsts, true)
+	require.NoError(t, err)
+	// Make sure both outputs have a length matching the input.
+	assert.Len(t, dsts, len(srcs))
+	assert.Len(t, dsts2, len(srcs))
+	// Test that values got copied.
+	for idx, src := range srcs {
+		assert.Zero(t, dsts[idx].ID)
+		assert.Equal(t, src.Priority, dsts[idx].Priority)
+		assert.Equal(t, src.Tags, dsts[idx].Tags)
+	}
+}
+
+// TestCopyIndexersNilDest test a nil destination pointer and slice.
+func TestCopyIndexersNilDest(t *testing.T) {
+	t.Parallel()
+	src1, _ := copyData(t)
+	src2, _ := copyData(t)
+	// Make two lists.
+	srcs := append([]*prowlarr.IndexerOutput{}, src1, src2)
+	dsts := new([]*sonarr.IndexerInput) // Super empty.
+	*dsts = nil                         // Nil the slice.
+	// Copy the lists.
+	dsts2, err := orbit.CopyIndexers(srcs, dsts, false)
+	require.NoError(t, err)
+	// Make sure both outputs have a length matching the input.
+	assert.Len(t, *dsts, len(srcs))
+	assert.Len(t, dsts2, len(srcs))
+	// Test that tags got removed.
+	for idx, src := range srcs {
+		assert.Zero(t, (*dsts)[idx].ID)
+		assert.Equal(t, src.Priority, (*dsts)[idx].Priority)
+		assert.NotEqual(t, src.Tags, (*dsts)[idx].Tags)
+	}
+
+	// Make an error.
+	dsts = nil // This is a no-no.
+	_, err = orbit.CopyIndexers(srcs, dsts, false)
+	require.ErrorIs(t, err, orbit.ErrNotPtr)
 }
 
 func TestCopyIndexer(t *testing.T) {
