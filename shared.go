@@ -335,15 +335,16 @@ func Str[I int | int64 | float64 | bool](val I) string {
 	}
 }
 
-// Protocol used to download media. Comes with enum constants.
-type Protocol string
+// None can be used to return only an error condition. The opposite of Must().
+// If the last argument is an error, that's what gets returned, otherwise nil.
+func None(input ...any) error {
+	if len(input) > 0 {
+		err, _ := input[len(input)-1].(error)
+		return err
+	}
 
-// These are all the starr-supported protocols.
-const (
-	ProtocolUnknown Protocol = "unknown"
-	ProtocolUsenet  Protocol = "usenet"
-	ProtocolTorrent Protocol = "torrent"
-)
+	return nil
+}
 
 // Must can be used to avoid checking an error you'll never run into.
 func Must[S any](input S, err error) S {
@@ -353,3 +354,13 @@ func Must[S any](input S, err error) S {
 
 	return input
 }
+
+// Protocol used to download media. Comes with enum constants.
+type Protocol string
+
+// These are all the starr-supported protocols.
+const (
+	ProtocolUnknown Protocol = "unknown"
+	ProtocolUsenet  Protocol = "usenet"
+	ProtocolTorrent Protocol = "torrent"
+)

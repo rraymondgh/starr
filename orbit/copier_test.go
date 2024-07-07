@@ -92,8 +92,7 @@ func TestCopyIndexersNilDest(t *testing.T) {
 
 	// Make an error.
 	dsts = nil // This is a no-no.
-	_, err = orbit.CopyIndexers(srcs, dsts, false)
-	require.ErrorIs(t, err, orbit.ErrNotPtr)
+	require.ErrorIs(t, starr.None(orbit.CopyIndexers(srcs, dsts, false)), orbit.ErrNotPtr)
 }
 
 func TestCopyIndexer(t *testing.T) {
@@ -101,8 +100,7 @@ func TestCopyIndexer(t *testing.T) {
 
 	src, dst := copyData(t)
 	// Verify everything copies over.
-	_, err := orbit.CopyIndexer(src, dst, true)
-	require.NoError(t, err)
+	require.NoError(t, starr.None(orbit.CopyIndexer(src, dst, true)))
 	assert.Equal(t, src.Fields[0].Value, dst.Fields[0].Value)
 	assert.Equal(t, src.Fields[1].Value, dst.Fields[1].Value)
 	assert.EqualValues(t, src.Fields[2].Value, dst.Fields[2].Value)

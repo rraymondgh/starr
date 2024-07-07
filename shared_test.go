@@ -29,3 +29,16 @@ func TestQueueDeleteOpts_Values(t *testing.T) {
 	assert.Equal("true", params.Get("blocklist"), "delete parameters encoded incorrectly")
 	assert.Equal("true", params.Get("skipRedownload"), "delete parameters encoded incorrectly")
 }
+
+func TestNone(t *testing.T) {
+	t.Parallel()
+	assert.ErrorIs(t, starr.None(starr.ErrNilClient), starr.ErrNilClient)
+	assert.ErrorIs(t, starr.None("string", starr.ErrNilClient), starr.ErrNilClient)
+	assert.ErrorIs(t, starr.None(uint(1), starr.ErrNilClient), starr.ErrNilClient)
+	assert.ErrorIs(t, starr.None("string", uint(1), starr.ErrNilClient), starr.ErrNilClient)
+	assert.ErrorIs(t, starr.None(1.0, "string", starr.ErrNilClient), starr.ErrNilClient)
+	require.NoError(t, starr.None(1.0, "string"))
+	require.NoError(t, starr.None("string"))
+	require.NoError(t, starr.None(1.0))
+	require.NoError(t, starr.None())
+}
