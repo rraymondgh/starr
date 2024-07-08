@@ -15,9 +15,10 @@ const bpRelease = APIver + "/release"
 
 // Release is the output from the Radarr release endpoint.
 type Release struct {
-	GUID                string         `json:"guid"`
-	Quality             *starr.Quality `json:"quality"`
-	CustomFormats       []any          `json:"customFormats"`
+	ID                  int64          `json:"id"`
+	GUID                string         `json:"guid,omitempty"`
+	Quality             starr.Quality  `json:"quality"`                 // QualityModel
+	CustomFormats       []any          `json:"customFormats,omitempty"` // CustomFormatResource
 	CustomFormatScore   int64          `json:"customFormatScore"`
 	QualityWeight       int64          `json:"qualityWeight"`
 	Age                 int64          `json:"age"`
@@ -25,33 +26,37 @@ type Release struct {
 	AgeMinutes          float64        `json:"ageMinutes"`
 	Size                int64          `json:"size"`
 	IndexerID           int64          `json:"indexerId"`
-	Indexer             string         `json:"indexer"`
-	ReleaseGroup        string         `json:"releaseGroup"`
-	ReleaseHash         string         `json:"releaseHash"`
-	Title               string         `json:"title"`
+	Indexer             string         `json:"indexer,omitempty"`
+	ReleaseGroup        string         `json:"releaseGroup,omitempty"`
+	SubGroup            string         `json:"subGroup,omitempty"`
+	ReleaseHash         string         `json:"releaseHash,omitempty"`
+	Title               string         `json:"title,omitempty"`
 	SceneSource         bool           `json:"sceneSource"`
-	MovieTitles         []string       `json:"movieTitles"`
-	Languages           []*starr.Value `json:"languages"`
-	MappedMovieID       int64          `json:"mappedMovieId"`
+	MovieTitles         []*string      `json:"movieTitles,omitempty"`
+	Languages           []*starr.Value `json:"languages,omitempty"` // Language
+	MappedMovieID       *int64         `json:"mappedMovieId,omitempty"`
 	Approved            bool           `json:"approved"`
 	TemporarilyRejected bool           `json:"temporarilyRejected"`
 	Rejected            bool           `json:"rejected"`
 	TmdbID              int64          `json:"tmdbId"`
 	ImdbID              int64          `json:"imdbId"`
-	Rejections          []string       `json:"rejections"`
+	Rejections          []*string      `json:"rejections,omitempty"`
 	PublishDate         time.Time      `json:"publishDate"`
-	CommentURL          string         `json:"commentUrl"`
-	DownloadURL         string         `json:"downloadUrl"`
-	InfoURL             string         `json:"infoUrl"`
+	CommentUrl          string         `json:"commentUrl,omitempty"`
+	DownloadUrl         string         `json:"downloadUrl,omitempty"`
+	InfoUrl             string         `json:"infoUrl,omitempty"`
 	DownloadAllowed     bool           `json:"downloadAllowed"`
 	ReleaseWeight       int64          `json:"releaseWeight"`
-	Edition             string         `json:"edition"`
-	MagnetURL           string         `json:"magnetUrl"`
-	InfoHash            string         `json:"infoHash"`
-	Seeders             int            `json:"seeders"`
-	Leechers            int            `json:"leechers"`
-	Protocol            starr.Protocol `json:"protocol"`
-	IndexerFlags        []string       `json:"indexerFlags"`
+	Edition             string         `json:"edition,omitempty"`
+	MagnetUrl           string         `json:"magnetUrl,omitempty"`
+	InfoHash            string         `json:"infoHash,omitempty"`
+	Seeders             *int64         `json:"seeders,omitempty"`
+	Leechers            *int64         `json:"leechers,omitempty"`
+	Protocol            starr.Protocol `json:"protocol"` // DownloadProtocol
+	MovieID             *int64         `json:"movieId,omitempty"`
+	DownloadClientID    *int64         `json:"downloadClientId,omitempty"`
+	DownloadClient      string         `json:"downloadClient,omitempty"`
+	ShouldOverride      *bool          `json:"shouldOverride,omitempty"`
 }
 
 // SearchRelease searches for and returns a list releases available for download.
@@ -102,24 +107,17 @@ type Grab struct {
 // Pass the release for the item from the SearchRelease output, and the movie ID you want the grab associated with.
 // If the movieID is 0 then the MappedMovieID in the release is used, but that is not always set.
 func (r *Radarr) GrabRelease(release *Release, movieID int64) (*Grab, error) {
-	return r.GrabReleaseContext(context.Background(), release, movieID)
+	return r.GrabReleaseContext(context.Background(), release)
 }
 
 // GrabReleaseContext attempts to download a release for a movie from a search.
 // Pass the release for the item from the SearchRelease output, and the movie ID you want the grab associated with.
 // If the movieID is 0 then the MappedMovieID in the release is used, but that is not always set.
-func (r *Radarr) GrabReleaseContext(ctx context.Context, release *Release, movieID int64) (*Grab, error) {
+func (r *Radarr) GrabReleaseContext(ctx context.Context, release *Release) (*Grab, error) {
 	grab := struct { // These are the required fields on the Radarr POST /release endpoint.
-		G string         `json:"guid"`
-		I int64          `json:"indexerId"`
-		L []*starr.Value `json:"languages"`
-		S bool           `json:"shouldOverride"`
-		M int64          `json:"movieId"`
-	}{G: release.GUID, I: release.IndexerID, L: release.Languages, S: true, M: movieID}
-
-	if grab.M == 0 { // Best effort?
-		grab.M = release.MappedMovieID
-	}
+		G string `json:"guid"`
+		I int64  `json:"indexerId"`
+	}{G: release.GUID, I: release.IndexerID}
 
 	var body bytes.Buffer
 	if err := json.NewEncoder(&body).Encode(&grab); err != nil {

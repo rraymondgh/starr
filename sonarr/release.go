@@ -17,65 +17,65 @@ const bpRelease = APIver + "/release"
 // Release is the output from the Sonarr release endpoint.
 type Release struct {
 	ID                           int64                 `json:"id"`
-	GUID                         string                `json:"guid"`
-	Quality                      starr.Quality         `json:"quality"`
+	GUID                         string                `json:"guid,omitempty"`
+	Quality                      starr.Quality         `json:"quality"` // QualityModel
 	QualityWeight                int64                 `json:"qualityWeight"`
 	Age                          int64                 `json:"age"`
-	AgeHours                     int                   `json:"ageHours"`
-	AgeMinutes                   int                   `json:"ageMinutes"`
-	Size                         int                   `json:"size"`
+	AgeHours                     float64               `json:"ageHours"`
+	AgeMinutes                   float64               `json:"ageMinutes"`
+	Size                         int64                 `json:"size"`
 	IndexerID                    int64                 `json:"indexerId"`
-	Indexer                      string                `json:"indexer"`
-	ReleaseGroup                 string                `json:"releaseGroup"`
-	SubGroup                     string                `json:"subGroup"`
-	ReleaseHash                  string                `json:"releaseHash"`
-	Title                        string                `json:"title"`
+	Indexer                      string                `json:"indexer,omitempty"`
+	ReleaseGroup                 string                `json:"releaseGroup,omitempty"`
+	SubGroup                     string                `json:"subGroup,omitempty"`
+	ReleaseHash                  string                `json:"releaseHash,omitempty"`
+	Title                        string                `json:"title,omitempty"`
 	FullSeason                   bool                  `json:"fullSeason"`
 	SceneSource                  bool                  `json:"sceneSource"`
-	SeasonNumber                 int                   `json:"seasonNumber"`
-	Languages                    []*starr.Value        `json:"languages"`
+	SeasonNumber                 int64                 `json:"seasonNumber"`
+	Languages                    []*starr.Value        `json:"languages,omitempty"` // Language
 	LanguageWeight               int64                 `json:"languageWeight"`
-	AirDate                      string                `json:"airDate"`
-	SeriesTitle                  string                `json:"seriesTitle"`
-	EpisodeNumbers               []int                 `json:"episodeNumbers"`
-	AbsoluteEpisodeNumbers       []int                 `json:"absoluteEpisodeNumbers"`
-	MappedSeasonNumber           int                   `json:"mappedSeasonNumber"`
-	MappedEpisodeNumbers         []int                 `json:"mappedEpisodeNumbers"`
-	MappedAbsoluteEpisodeNumbers []int                 `json:"mappedAbsoluteEpisodeNumbers"`
-	MappedSeriesID               int64                 `json:"mappedSeriesId"`
-	MappedEpisodeInfo            []*ReleaseEpisodeInfo `json:"mappedEpisodeInfo"`
+	AirDate                      string                `json:"airDate,omitempty"`
+	SeriesTitle                  string                `json:"seriesTitle,omitempty"`
+	EpisodeNumbers               []*int64              `json:"episodeNumbers,omitempty"`
+	AbsoluteEpisodeNumbers       []*int64              `json:"absoluteEpisodeNumbers,omitempty"`
+	MappedSeasonNumber           *int64                `json:"mappedSeasonNumber,omitempty"`
+	MappedEpisodeNumbers         []*int64              `json:"mappedEpisodeNumbers,omitempty"`
+	MappedAbsoluteEpisodeNumbers []*int64              `json:"mappedAbsoluteEpisodeNumbers,omitempty"`
+	MappedSeriesID               *int64                `json:"mappedSeriesId,omitempty"`
+	MappedEpisodeInfo            []*ReleaseEpisodeInfo `json:"mappedEpisodeInfo,omitempty"` // ReleaseEpisodeResource
 	Approved                     bool                  `json:"approved"`
 	TemporarilyRejected          bool                  `json:"temporarilyRejected"`
 	Rejected                     bool                  `json:"rejected"`
 	TvdbID                       int64                 `json:"tvdbId"`
-	TvRageID                     int                   `json:"tvRageId"`
-	Rejections                   []string              `json:"rejections"`
+	TvRageID                     int64                 `json:"tvRageId"`
+	Rejections                   []*string             `json:"rejections,omitempty"`
 	PublishDate                  time.Time             `json:"publishDate"`
-	CommentURL                   string                `json:"commentUrl"`
-	DownloadURL                  string                `json:"downloadUrl"`
-	InfoURL                      string                `json:"infoUrl"`
+	CommentUrl                   string                `json:"commentUrl,omitempty"`
+	DownloadUrl                  string                `json:"downloadUrl,omitempty"`
+	InfoUrl                      string                `json:"infoUrl,omitempty"`
 	EpisodeRequested             bool                  `json:"episodeRequested"`
 	DownloadAllowed              bool                  `json:"downloadAllowed"`
 	ReleaseWeight                int64                 `json:"releaseWeight"`
-	CustomFormats                []*CustomFormatOutput `json:"customFormats"`
+	CustomFormats                []*CustomFormatOutput `json:"customFormats,omitempty"` // CustomFormatResource
 	CustomFormatScore            int64                 `json:"customFormatScore"`
-	SceneMapping                 ReleaseSceneMapping   `json:"sceneMapping"`
-	MagnetURL                    string                `json:"magnetUrl"`
-	InfoHash                     string                `json:"infoHash"`
-	Seeders                      int                   `json:"seeders"`
-	Leechers                     int                   `json:"leechers"`
-	Protocol                     starr.Protocol        `json:"protocol"`
-	IndexerFlags                 int64                 `json:"indexerFlags"`
-	IsDaily                      bool                  `json:"isDaily"`
-	IsAbsoluteNumbering          bool                  `json:"isAbsoluteNumbering"`
-	IsPossibleSpecialEpisode     bool                  `json:"isPossibleSpecialEpisode"`
-	Special                      bool                  `json:"special"`
-	SeriesID                     int64                 `json:"seriesId"`
-	EpisodeID                    int64                 `json:"episodeId"`
-	EpisodeIDs                   []int64               `json:"episodeIds"`
-	DownloadClientID             int64                 `json:"downloadClientId"`
-	DownloadClient               string                `json:"downloadClient"`
-	ShouldOverride               bool                  `json:"shouldOverride"`
+	SceneMapping                 ReleaseSceneMapping   `json:"sceneMapping"` // AlternateTitleResource
+	MagnetUrl                    string                `json:"magnetUrl,omitempty"`
+	InfoHash                     string                `json:"infoHash,omitempty"`
+	Seeders                      *int64                `json:"seeders,omitempty"`
+	Leechers                     *int64                `json:"leechers,omitempty"`
+	Protocol                     starr.Protocol        `json:"protocol"` // DownloadProtocol
+	// IndexerFlags                 int64                 `json:"indexerFlags"`
+	IsDaily                  bool     `json:"isDaily"`
+	IsAbsoluteNumbering      bool     `json:"isAbsoluteNumbering"`
+	IsPossibleSpecialEpisode bool     `json:"isPossibleSpecialEpisode"`
+	Special                  bool     `json:"special"`
+	SeriesID                 *int64   `json:"seriesId,omitempty"`
+	EpisodeID                *int64   `json:"episodeId,omitempty"`
+	EpisodeIds               []*int64 `json:"episodeIds,omitempty"`
+	DownloadClientID         *int64   `json:"downloadClientId,omitempty"`
+	DownloadClient           string   `json:"downloadClient,omitempty"`
+	ShouldOverride           *bool    `json:"shouldOverride,omitempty"`
 }
 
 // ReleaseSceneMapping is part of a release.

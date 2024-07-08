@@ -15,32 +15,38 @@ const bpSearch = APIver + "/search"
 
 // Search is the output from the Prowlarr search endpoint.
 type Search struct {
-	GUID         string         `json:"guid"`
-	Age          int64          `json:"age"`
-	AgeHours     float64        `json:"ageHours"`
-	AgeMinutes   float64        `json:"ageMinutes"`
-	Size         int64          `json:"size"`
-	Files        int            `json:"files"`
-	Grabs        int            `json:"grabs"`
-	IndexerID    int64          `json:"indexerId"`
-	Indexer      string         `json:"indexer"`
-	Title        string         `json:"title"`
-	SortTitle    string         `json:"sortTitle"`
-	ImdbID       int64          `json:"imdbId"`
-	TmdbID       int64          `json:"tmdbId"`
-	TvdbID       int64          `json:"tvdbId"`
-	TvMazeID     int64          `json:"tvMazeId"`
-	PublishDate  time.Time      `json:"publishDate"`
-	CommentURL   string         `json:"commentUrl"`
-	DownloadURL  string         `json:"downloadUrl"`
-	InfoURL      string         `json:"infoUrl"`
-	IndexerFlags []string       `json:"indexerFlags"`
-	Categories   []*Category    `json:"categories"`
-	Protocol     starr.Protocol `json:"protocol"`
-	FileName     string         `json:"fileName"`
-	InfoHash     string         `json:"infoHash"`
-	Seeders      int            `json:"seeders"`
-	Leechers     int            `json:"leechers"`
+	ID          int64     `json:"id"`
+	GUID        string    `json:"guid,omitempty"`
+	Age         int64     `json:"age"`
+	AgeHours    float64   `json:"ageHours"`
+	AgeMinutes  float64   `json:"ageMinutes"`
+	Size        int64     `json:"size"`
+	Files       *int64    `json:"files,omitempty"`
+	Grabs       *int64    `json:"grabs,omitempty"`
+	IndexerID   int64     `json:"indexerId"`
+	Indexer     string    `json:"indexer,omitempty"`
+	SubGroup    string    `json:"subGroup,omitempty"`
+	ReleaseHash string    `json:"releaseHash,omitempty"`
+	Title       string    `json:"title,omitempty"`
+	SortTitle   string    `json:"sortTitle,omitempty"`
+	ImdbID      int64     `json:"imdbId"`
+	TmdbID      int64     `json:"tmdbId"`
+	TvdbID      int64     `json:"tvdbId"`
+	TvMazeID    int64     `json:"tvMazeId"`
+	PublishDate time.Time `json:"publishDate"`
+	CommentUrl  string    `json:"commentUrl,omitempty"`
+	DownloadUrl string    `json:"downloadUrl,omitempty"`
+	InfoUrl     string    `json:"infoUrl,omitempty"`
+	PosterUrl   string    `json:"posterUrl,omitempty"`
+	// IndexerFlags     []*string      `json:"indexerFlags,omitempty"`
+	Categories       []*Category    `json:"categories,omitempty"` // IndexerCategory
+	MagnetUrl        string         `json:"magnetUrl,omitempty"`
+	InfoHash         string         `json:"infoHash,omitempty"`
+	Seeders          *int64         `json:"seeders,omitempty"`
+	Leechers         *int64         `json:"leechers,omitempty"`
+	Protocol         starr.Protocol `json:"protocol"` // DownloadProtocol
+	FileName         string         `json:"fileName,omitempty"`
+	DownloadClientID *int64         `json:"downloadClientId,omitempty"`
 }
 
 // Category is part of the Search output.
